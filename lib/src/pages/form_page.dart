@@ -141,21 +141,20 @@ class FormPage extends StatelessWidget {
 
     formKey.currentState.save();
 
-    // Map <String, dynamic> createClientResp = await clientProvider.createClient(client);
-    await clientProvider.createClient(client);
+    Map <String, dynamic> createClientResp = await clientProvider.createClient(client);
 
-    // if(createClientResp['ok']){
+    if(createClientResp['ok']){
 
-    //   // userData.hasCreatedQR = true;
+      userData.hasCreatedQR = true;
 
-    //   // final updateResponse = await loginProvider.updateUserName(userData.dataID, userData.idToken);
+      final updateResponse = await loginProvider.updateUserName(userData.dataID, userData.idToken);
     
-    //   // Navigator.pushReplacementNamed(context, 'home');
+      Navigator.pushReplacementNamed(context, 'home');
 
-    //   print('ok');
-    // }else{
-    //   utils.showErrorAlert(context, createClientResp['message']);
-    // }
+      print('ok');
+    }else{
+      utils.showErrorAlert(context, createClientResp['message']);
+    }
     
   }
     // TODO: manejar respuesta de la API
