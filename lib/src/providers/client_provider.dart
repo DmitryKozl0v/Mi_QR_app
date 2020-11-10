@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 // import 'package:uuid/uuid.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -68,5 +69,18 @@ class ClientProvider{
     // print(client);
 
     return client;
+  }
+
+  updateUserMetaData(){
+
+    final userData = SavedUserData();
+
+    DatabaseReference ref = FirebaseDatabase.instance.reference().child('/metadata/${userData.uId}');
+
+    Map<String, dynamic> loginData;
+
+      
+
+    
   }
 }
