@@ -195,69 +195,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  _login(LoginData loginData, BuildContext context, SavedUserData userData, FirebaseUser firebaseUser) async{
-
-    FocusScope.of(context).requestFocus(FocusNode());
-
-    setState(() {
-      _isLoading = true;
-    });
-    
-    loginKey.currentState.save();
-    Map loginInfo = await loginProvider.login(loginData.email, loginData.password);
-
-    if(loginInfo['ok']){
-
-      Map requestInfo = await loginProvider.requestUser(loginInfo['token'], firebaseUser);
-      userData.idToken = loginInfo['token'];
-
-      if(requestInfo['ok']){
-
-        if(userData.uId == loginInfo['uid'] && userData.dataID != ''){
-
-          setState(() {
-            _isLoading = false;
-          });
-          Navigator.pushReplacementNamed(context, 'home');
-
-        }else if(requestInfo['user'] != null){
-
-          setState(() {
-            _isLoading = false;
-          });
-          userData.dataID = requestInfo['user'];
-          userData.uId = loginInfo['uid'];
-          userData.hasCreatedQR = true;
-          Navigator.pushReplacementNamed(context, 'home');
-
-        }else{
-
-          setState(() {
-            _isLoading = false;
-          });
-          userData.hasCreatedQR = false;
-          userData.uId = loginInfo['uid'];
-          Navigator.pushReplacementNamed(context, 'disclaimer');
-
-        }
-      }else{
-
-        setState(() {
-            _isLoading = false;
-          });
-        utils.showErrorAlert(context, requestInfo['message']);
-
-      }
-    }else{
-
-      setState(() {
-            _isLoading = false;
-          });
-      utils.showErrorAlert(context, loginInfo['message']);
-
-    }
-  }
-
   Widget _crearFondo(BuildContext context) {
 
     final size = MediaQuery.of(context).size;
@@ -315,4 +252,73 @@ class _LoginPageState extends State<LoginPage> {
     );
 
   }
+
+  _login(LoginData loginData, BuildContext context, SavedUserData userData, FirebaseUser firebaseUser) async{
+
+    FocusScope.of(context).requestFocus(FocusNode());
+
+    setState(() {
+      _isLoading = true;
+    });
+    
+    loginKey.currentState.save();
+    // Map loginInfo = await loginProvider.login(loginData.email, loginData.password);
+    Map loginInfo = await loginProvider.firebaseAuthLogin(loginData.email, loginData.password);
+
+
+    if(loginInfo['ok']){
+
+      Map requestInfo = await loginProvider.requestUser(loginInfo['token'], firebaseUser);
+      userData.idToken = loginInfo['token'];
+
+
+
+      if(requestInfo['ok']){
+
+        if(userData.uId == loginInfo['uid'] && userData.dataID != ''){
+
+          setState(() {
+            _isLoading = false;
+          });
+          Navigator.pushReplacementNamed(context, 'home');
+
+        }else if(requestInfo['user'] != null){
+
+          setState(() {
+            _isLoading = false;
+          });
+          userData.dataID = requestInfo['user'];
+          userData.uId = loginInfo['uid'];
+          userData.hasCreatedQR = true;
+          Navigator.pushReplacementNamed(context, 'home');
+
+        }else{
+
+          setState(() {
+            _isLoading = false;
+          });
+          userData.hasCreatedQR = false;
+          userData.uId = loginInfo['uid'];
+          Navigator.pushReplacementNamed(context, 'disclaimer');
+
+        }
+      }else{
+
+        setState(() {
+            _isLoading = false;
+          });
+        utils.showErrorAlert(context, requestInfo['message']);
+
+      }
+    }else{
+
+      setState(() {
+            _isLoading = false;
+          });
+      utils.showErrorAlert(context, loginInfo['message']);
+
+    }
+  }
+
+  
 }

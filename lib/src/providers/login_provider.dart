@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
-import 'package:qr_app_cliente2/src/models/firebase_user_model.dart';
+import 'package:qr_app_cliente2/src/models/firebase_user_model.dart' as fum;
 import 'package:qr_app_cliente2/src/shared_preferences/shared_preferences.dart';
 
 
@@ -9,6 +10,7 @@ class LoginProvider {
 
   final String _firebaseToken = 'AIzaSyBThFX1tranSrVdeJG1LnZCb48Ac1LzUjw';
   final _userData = SavedUserData();
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   Future<Map<String, dynamic>> login( String email, String password) async{
 
@@ -87,7 +89,7 @@ class LoginProvider {
     }
   }
 
-  Future<Map<String, dynamic>> requestUser(String idToken, FirebaseUser firebaseUser) async{
+  Future<Map<String, dynamic>> requestUser(String idToken, fum.FirebaseUser firebaseUser) async{
 
     final userData = {
       'idToken'       : idToken,
@@ -101,7 +103,7 @@ class LoginProvider {
     dynamic decodedResp = json.decode( resp.body );
 
     if ( decodedResp.containsKey('users') ) { 
-      firebaseUser = FirebaseUser.fromJson(decodedResp);
+      firebaseUser = fum.FirebaseUser.fromJson(decodedResp);
 
     // print(firebaseUser.users[0].emailVerified);
 
@@ -161,6 +163,62 @@ class LoginProvider {
       return { 'ok': true};
     } else {
       return { 'ok': false, 'message': decodedResp['error']['message'] };
+    }
+  }
+
+
+   // ignore: missing_return
+   Future<Map<String, dynamic>> firebaseAuthLogin (String email, String password) async{
+
+    try {
+
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
+        email: email,
+        password: password
+      );
+
+      String idToken = await userCredential.user.getIdToken();
+      return { 'ok': true, 'token': idToken, 'uid': userCredential.user.uid};
+
+    } on FirebaseAuthException catch (e) {
+
+      if (e.code == 'user-not-found') {
+        return { 'ok': false, 'message': 'Usuario no encontrado'};
+      } else if (e.code == 'wrong-password') {
+        return { 'ok': false, 'message': 'Contraseña incorrecta'};
+      }
+    }
+  }
+
+  // ignore: missing_return
+  Future<Map<String, dynamic>> firebaseAuthNewUser (String email, String password) async{
+
+    try{
+      UserCredential userCredential = await auth.createUserWithEmailAndPassword(
+      email: email, 
+      password: password
+    );
+
+      String idToken = await userCredential.user.getIdToken();
+      return { 'ok': true, 'token': idToken, 'uid': userCredential.user.uid};
+
+    } on FirebaseAuthException catch(e){
+      if(e.code == 'email-already-in-use'){
+        return { 'ok': false, 'message': 'Email ya registrado'};
+      }else if(e.code == 'invalid-email'){
+        return { 'ok': false, 'message': 'Email inválido'};
+      }
+    }
+  }
+
+  Map<String, dynamic> firebaseAuthGetCurrentUser (String email, String password){
+
+    User user = auth.currentUser;
+
+    if(user != null){
+      return { 'ok': true, 'user': user};
+    }else{
+      return { 'ok': false};
     }
   }
 
