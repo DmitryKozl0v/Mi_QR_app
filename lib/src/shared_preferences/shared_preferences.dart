@@ -59,12 +59,12 @@ class SavedUserData{
 
   // GET & SET para uId
 
-  get uId{
-    return _prefs.getString('uId') ?? '';
+  get uid{
+    return _prefs.getString('uid') ?? '';
   }
 
-  set uId(String value){
-    _prefs.setString('uId', value);
+  set uid(String value){
+    _prefs.setString('uid', value);
   }
 
 }

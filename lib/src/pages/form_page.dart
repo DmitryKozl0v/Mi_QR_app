@@ -4,11 +4,14 @@ import 'package:flutter/services.dart';
 
 import 'package:qr_app_cliente2/src/bloc/client_bloc.dart';
 import 'package:qr_app_cliente2/src/bloc/provider.dart';
+
 import 'package:qr_app_cliente2/src/models/client_model.dart';
+
+import 'package:qr_app_cliente2/src/utils/utils.dart' as utils;
+
 import 'package:qr_app_cliente2/src/providers/client_provider.dart';
 import 'package:qr_app_cliente2/src/providers/login_provider.dart';
 import 'package:qr_app_cliente2/src/shared_preferences/shared_preferences.dart';
-import 'package:qr_app_cliente2/src/utils/utils.dart' as utils;
 
 class FormPage extends StatelessWidget {
 
@@ -141,24 +144,22 @@ class FormPage extends StatelessWidget {
 
     formKey.currentState.save();
 
-    // Map <String, dynamic> createClientResp = await clientProvider.createClient(client);
-    await clientProvider.createClient(client);
+    Map <String, dynamic> createClientResp = await clientProvider.createClient(client);
 
-    // if(createClientResp['ok']){
+    if(createClientResp['ok']){
 
-    //   // userData.hasCreatedQR = true;
+      userData.hasCreatedQR = true;
 
-    //   // final updateResponse = await loginProvider.updateUserName(userData.dataID, userData.idToken);
+      await loginProvider.updateUserName(userData.dataID, userData.idToken);
     
-    //   // Navigator.pushReplacementNamed(context, 'home');
+      Navigator.pushReplacementNamed(context, 'home');
 
-    //   print('ok');
-    // }else{
-    //   utils.showErrorAlert(context, createClientResp['message']);
-    // }
+      print('ok');
+    }else{
+      utils.showErrorAlert(context, createClientResp['message']);
+    }
     
   }
-    // TODO: manejar respuesta de la API
 
   Widget _crearDNI(ClientBloc clientBloc){
 

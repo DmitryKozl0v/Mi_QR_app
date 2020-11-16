@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-
-import 'package:qr_app_cliente2/src/models/firebase_user_model.dart';
 import 'package:qr_app_cliente2/src/models/login_model.dart';
+import 'package:qr_app_cliente2/src/providers/client_provider.dart';
 
 import 'package:qr_app_cliente2/src/utils/utils.dart' as utils;
 import 'package:qr_app_cliente2/src/bloc/login_bloc.dart';
@@ -18,8 +17,8 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
 
-  final firebaseUser  = FirebaseUser();
   final loginData     = LoginData();
+  final clientProvider = ClientProvider();
   final loginProvider = LoginProvider();
   final loginKey      = GlobalKey<FormState>();
   bool _isLoading = false;
@@ -189,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
           color: Colors.deepPurple,
           textColor: Colors.white,
           // onPressed: snapshot.hasData ? ()=> _login(loginData, context, userData) : null
-          onPressed: () => _login(loginData, context, userData, firebaseUser)
+          onPressed: () => _login(loginData, context, userData)
         );
       },
     );
@@ -253,42 +252,45 @@ class _LoginPageState extends State<LoginPage> {
 
   }
 
-  _login(LoginData loginData, BuildContext context, SavedUserData userData, FirebaseUser firebaseUser) async{
+  _login(LoginData loginData, BuildContext context, SavedUserData userData, ) async{
 
-    FocusScope.of(context).requestFocus(FocusNode());
+    FocusScope.of(context).requestFocus(FocusNode());   //Removes keyboard!
 
     setState(() {
       _isLoading = true;
     });
     
     loginKey.currentState.save();
-    // Map loginInfo = await loginProvider.login(loginData.email, loginData.password);
     Map loginInfo = await loginProvider.firebaseAuthLogin(loginData.email, loginData.password);
-
 
     if(loginInfo['ok']){
 
-      Map requestInfo = await loginProvider.requestUser(loginInfo['token'], firebaseUser);
+      Map idTokenData = await loginProvider.firebaseAuthGetIdTokenExpirationTime();
       userData.idToken = loginInfo['token'];
 
 
+      if(idTokenData['ok']){
+        await clientProvider.updateUserMetaData(loginInfo['token'], loginInfo['uid'], idTokenData['date']);
+      }
 
-      if(requestInfo['ok']){
+      Map userInfo = loginProvider.firebaseAuthGetCurrentUser();
 
-        if(userData.uId == loginInfo['uid'] && userData.dataID != ''){
+      if(userInfo['ok']){
+
+        if(userData.uid == loginInfo['uid'] && userData.dataID != ''){
 
           setState(() {
             _isLoading = false;
           });
           Navigator.pushReplacementNamed(context, 'home');
 
-        }else if(requestInfo['user'] != null){
+        }else if(userInfo['user'] != null){
 
           setState(() {
             _isLoading = false;
           });
-          userData.dataID = requestInfo['user'];
-          userData.uId = loginInfo['uid'];
+          userData.dataID = userInfo['user'].displayName;
+          userData.uid = loginInfo['uid'];
           userData.hasCreatedQR = true;
           Navigator.pushReplacementNamed(context, 'home');
 
@@ -298,7 +300,7 @@ class _LoginPageState extends State<LoginPage> {
             _isLoading = false;
           });
           userData.hasCreatedQR = false;
-          userData.uId = loginInfo['uid'];
+          userData.uid = loginInfo['uid'];
           Navigator.pushReplacementNamed(context, 'disclaimer');
 
         }
@@ -307,7 +309,7 @@ class _LoginPageState extends State<LoginPage> {
         setState(() {
             _isLoading = false;
           });
-        utils.showErrorAlert(context, requestInfo['message']);
+        utils.showErrorAlert(context, userInfo['message']);
 
       }
     }else{
