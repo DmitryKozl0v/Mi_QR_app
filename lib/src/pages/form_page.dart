@@ -150,7 +150,7 @@ class FormPage extends StatelessWidget {
 
       userData.hasCreatedQR = true;
 
-      await loginProvider.updateUserName(userData.dataID, userData.idToken);
+      await loginProvider.updateUserName(userData.dataID, userData.idToken):
     
       Navigator.pushReplacementNamed(context, 'home');
 
