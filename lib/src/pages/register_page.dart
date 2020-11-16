@@ -193,7 +193,7 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     registerKey.currentState.save();
-    Map newUserInfo = await loginProvider.newUser(loginData.email, loginData.password);
+    Map newUserInfo = await loginProvider.firebaseAuthNewUser(loginData.email, loginData.password);
     await loginProvider.requestEmailVerification(newUserInfo['token'], loginData.email);
 
     if(newUserInfo['ok']){

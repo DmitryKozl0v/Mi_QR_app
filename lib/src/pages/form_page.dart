@@ -4,11 +4,14 @@ import 'package:flutter/services.dart';
 
 import 'package:qr_app_cliente2/src/bloc/client_bloc.dart';
 import 'package:qr_app_cliente2/src/bloc/provider.dart';
+
 import 'package:qr_app_cliente2/src/models/client_model.dart';
+
+import 'package:qr_app_cliente2/src/utils/utils.dart' as utils;
+
 import 'package:qr_app_cliente2/src/providers/client_provider.dart';
 import 'package:qr_app_cliente2/src/providers/login_provider.dart';
 import 'package:qr_app_cliente2/src/shared_preferences/shared_preferences.dart';
-import 'package:qr_app_cliente2/src/utils/utils.dart' as utils;
 
 class FormPage extends StatelessWidget {
 
@@ -147,7 +150,7 @@ class FormPage extends StatelessWidget {
 
       userData.hasCreatedQR = true;
 
-      final updateResponse = await loginProvider.updateUserName(userData.dataID, userData.idToken);
+      await loginProvider.updateUserName(userData.dataID, userData.idToken):
     
       Navigator.pushReplacementNamed(context, 'home');
 
@@ -157,7 +160,6 @@ class FormPage extends StatelessWidget {
     }
     
   }
-    // TODO: manejar respuesta de la API
 
   Widget _crearDNI(ClientBloc clientBloc){
 
