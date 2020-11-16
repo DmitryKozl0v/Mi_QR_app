@@ -13,7 +13,7 @@ class ClientProvider{
 
     final userData = new SavedUserData();
 
-    final url = '$_url/cliente/json';
+    final url = '$_url/cliente.json';
 
     final resp = await http.post(url, body: clientModelToJson(client));
 
@@ -33,7 +33,7 @@ class ClientProvider{
 
     final userData = new SavedUserData();
 
-    final url = '$_url/cliente/${userData.uId}/${userData.dataID}.json';
+    final url = '$_url/cliente/${userData.dataID}.json';
 
     final resp = await http.get(url);
 
