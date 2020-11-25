@@ -11,9 +11,9 @@ class ClientProvider{
 
   final String _url = 'https://qr-app-cliente.firebaseio.com';
 
-  Future<Map <String, dynamic>> createClient (ClientModel client) async{
+  Future<Map <String, dynamic>> createClient (ClientModel client, String idToken) async{
     
-    final url = '$_url/cliente.json?auth=${_userData.idToken}';
+    final url = '$_url/cliente.json?auth=$idToken';
 
     final resp = await http.post(
       url, 
@@ -31,9 +31,9 @@ class ClientProvider{
     }
   }
 
-  Future<ClientModel> requestClient (ClientModel client) async{
+  Future<ClientModel> requestClient (ClientModel client, String idToken) async{
 
-    final url = '$_url/cliente/${_userData.dataID}.json?auth=${_userData.idToken}';
+    final url = '$_url/cliente/${_userData.dataID}.json?auth=$idToken';
 
     final resp = await http.get(url);
 

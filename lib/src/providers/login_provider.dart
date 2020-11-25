@@ -30,7 +30,6 @@ class LoginProvider {
 
     if ( decodedResp.containsKey('localId') ) { 
       print(decodedResp['displayName']);
-      _userData.idToken = decodedResp['idToken'];
       return { 'ok': true, 'token': decodedResp['idToken'], 'uid': decodedResp['localId'] };
     } else {
       // return { 'ok': false};
@@ -114,7 +113,7 @@ class LoginProvider {
       return { 'ok': false, 'message': decodedResp['error']['message'] };
     }
   }
-   // ignore: missing_return
+
    Future<Map<String, dynamic>> firebaseAuthLogin(String email, String password) async{
 
     try {
@@ -135,8 +134,9 @@ class LoginProvider {
         return { 'ok': false, 'message': 'Contraseña incorrecta'};
       }
     }
+    return {'0': '0'};
   }
-  // ignore: missing_return
+
   Future<Map<String, dynamic>> firebaseAuthNewUser(String email, String password) async{
 
     try{
@@ -155,14 +155,17 @@ class LoginProvider {
         return { 'ok': false, 'message': 'Email inválido'};
       }
     }
+    return {'0': '0'};
   }
 
-  Map<String, dynamic> firebaseAuthGetCurrentUser(){
+  Future<Map<String, dynamic>> firebaseAuthGetCurrentUser() async{
 
     User user = _auth.currentUser;
+    bool verified = user.emailVerified;
+    String idToken = await user.getIdToken();
 
     if(user != null){
-      return { 'ok': true, 'user': user};
+      return { 'ok': true, 'user': user, 'verified': verified, 'idToken': idToken};
     }else{
       return { 'ok': false};
     }
@@ -172,11 +175,36 @@ class LoginProvider {
 
     IdTokenResult tokenResult = await _auth.currentUser.getIdTokenResult();
 
+    _userData.expDate = tokenResult.expirationTime.toString();
+
     if (tokenResult.token != null){
       return {'ok': true, 'date': tokenResult.expirationTime};
     }else{
       return {'ok': false};
     }
+  }
+
+  Future<String> firebaseAuthRefreshSession() async{
+
+    DateTime now = DateTime.now();
+
+    DateTime expDate = DateTime.parse(_userData.expDate);
+
+    var result = now.compareTo(expDate);
+
+    if (result < 0){
+
+      // no longer valid, refresh idToken
+      Future<String> idToken = _auth.currentUser.getIdToken(true);
+      _userData.expDate = now.toString();
+      return idToken;
+      
+    }else if(result >= 0){
+
+      // valid idToken, do not refresh
+      return 'not-refreshed';
+    }
+    return '0';
   }
 
 }

@@ -12,27 +12,23 @@ class UserDataPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String idToken = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0.0,
       ),
-      body: _crearPagina(context),
+      body: Stack(
+
+        children: <Widget>[
+          _crearFondo(),
+          _datosForm(context, idToken),
+        ],
+      )
     );
   }
 
-
-  Stack _crearPagina(BuildContext context){
-
-    return Stack(
-
-      children: <Widget>[
-        _crearFondo(),
-        _datosForm(context),
-      ],
-    );
-  }
 
   Widget _crearFondo(){
 
@@ -44,9 +40,9 @@ class UserDataPage extends StatelessWidget {
     );
   }
 
-  Widget _datosForm(BuildContext context){
+  Widget _datosForm(BuildContext context, String idToken){
 
-    final Future<ClientModel> requestedData = clientProvider.requestClient(client);
+    final Future<ClientModel> requestedData = clientProvider.requestClient(client, idToken);
     final size = MediaQuery.of(context).size;
 
     return SafeArea(

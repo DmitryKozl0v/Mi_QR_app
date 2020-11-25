@@ -49,12 +49,12 @@ class SavedUserData{
 
   // GET & SET para idToken
 
-  get idToken{
-    return _prefs.getString('idToken') ?? '';
+  get expDate{
+    return _prefs.getString('expDate') ?? '';
   }
 
-  set idToken(String value){
-    _prefs.setString('idToken', value);
+  set expDate(String value){
+    _prefs.setString('expDate', value);
   }
 
   // GET & SET para uId

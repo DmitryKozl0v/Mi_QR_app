@@ -27,22 +27,20 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
-            children: <Widget>[
-              _crearFondo( context ),
-              _loginForm( context ),
-
-              _isLoading ? Stack(children: <Widget>[
-                Container(height: double.infinity,width: double.infinity, color: Colors.white24,),
-                Center(child: CircularProgressIndicator(
-                  backgroundColor: Color.fromRGBO(39, 39, 39, 1.0),
-                  strokeWidth: 5.0,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple[400])
-                  )
-                )
-              ]) : Container()
-
-            ],
-          )
+        children: <Widget>[
+          _crearFondo( context ),
+          _loginForm( context ),
+          _isLoading ? Stack(children: <Widget>[
+            Container(height: double.infinity,width: double.infinity, color: Colors.white24,),
+            Center(child: CircularProgressIndicator(
+              backgroundColor: Color.fromRGBO(39, 39, 39, 1.0),
+              strokeWidth: 5.0,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple[400])
+              )
+            )
+          ]) : Container()
+        ],
+      )
     );
   }
 
@@ -84,17 +82,13 @@ class _LoginPageState extends State<LoginPage> {
                 children: <Widget>[
                   Text('Ingreso', style: TextStyle(fontSize: 20.0)),
                   SizedBox( height: 60.0 ),
-                  FlatButton(
-                    child: Text('¿No te has registrado aún? Crear nueva cuenta'),
-                    onPressed: () => Navigator.pushReplacementNamed(context, 'register'),
-                    textColor: Colors.blueAccent,
-                  ),
-                  SizedBox( height: 15.0 ),
                   _crearEmail( loginBloc ),
                   SizedBox( height: 30.0 ),
                   _crearPassword( loginBloc ),
-                  SizedBox( height: 30.0 ),
-                  _crearBoton(loginBloc, loginData, userData )
+                  SizedBox( height: 50.0 ),
+                  _crearBoton(loginBloc, loginData, userData, size),
+                  SizedBox( height: 20.0 ),
+                  _crearBotonRegistro(size)
                 ],
               ),
             ),
@@ -170,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _crearBoton( LoginBloc loginBloc, LoginData loginData, SavedUserData userData) {
+  Widget _crearBoton( LoginBloc loginBloc, LoginData loginData, SavedUserData userData, Size size) {
 
     return StreamBuilder(
       stream: loginBloc.loginValidStream,
@@ -178,8 +172,9 @@ class _LoginPageState extends State<LoginPage> {
         
         return RaisedButton(
           child: Container(
-            padding: EdgeInsets.symmetric( horizontal: 80.0, vertical: 15.0),
-            child: Text('Ingresar'),
+            height: size.height * 0.062,
+            width: size.width * 0.6,
+            child: Center(child: Text('Ingresar')),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(5.0)
@@ -191,6 +186,24 @@ class _LoginPageState extends State<LoginPage> {
           onPressed: () => _login(loginData, context, userData)
         );
       },
+    );
+  }
+
+  Widget _crearBotonRegistro(Size size){
+
+    return RaisedButton(
+      child: Container(
+        height: size.height * 0.062,
+        width: size.width * 0.6,
+        child: Center(child: Text('Registrarse')),
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5.0)
+      ),
+      elevation: 0.0,
+      color: Colors.deepPurple,
+      textColor: Colors.white,
+      onPressed: () => Navigator.pushReplacementNamed(context, 'register'),
     );
   }
 
@@ -246,15 +259,14 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         )
-
       ],
     );
-
   }
 
   _login(LoginData loginData, BuildContext context, SavedUserData userData, ) async{
 
     FocusScope.of(context).requestFocus(FocusNode());   //Removes keyboard!
+    userData.hasCreatedQR = false;
 
     setState(() {
       _isLoading = true;
@@ -266,14 +278,12 @@ class _LoginPageState extends State<LoginPage> {
     if(loginInfo['ok']){
 
       Map idTokenData = await loginProvider.firebaseAuthGetIdTokenExpirationTime();
-      userData.idToken = loginInfo['token'];
-
 
       if(idTokenData['ok']){
         await clientProvider.updateUserMetaData(loginInfo['token'], loginInfo['uid'], idTokenData['date']);
       }
 
-      Map userInfo = loginProvider.firebaseAuthGetCurrentUser();
+      Map userInfo = await loginProvider.firebaseAuthGetCurrentUser();
 
       if(userInfo['ok']){
 
@@ -282,9 +292,10 @@ class _LoginPageState extends State<LoginPage> {
           setState(() {
             _isLoading = false;
           });
-          Navigator.pushReplacementNamed(context, 'home');
+          userData.hasCreatedQR = true;
+          Navigator.pushReplacementNamed(context, 'home', arguments: loginInfo['token']);
 
-        }else if(userInfo['user'] != null){
+        }else if(userInfo['user'].displayName != null){
 
           setState(() {
             _isLoading = false;
@@ -292,16 +303,15 @@ class _LoginPageState extends State<LoginPage> {
           userData.dataID = userInfo['user'].displayName;
           userData.uid = loginInfo['uid'];
           userData.hasCreatedQR = true;
-          Navigator.pushReplacementNamed(context, 'home');
+          Navigator.pushReplacementNamed(context, 'home', arguments: loginInfo['token']);
 
         }else{
 
           setState(() {
             _isLoading = false;
           });
-          userData.hasCreatedQR = false;
           userData.uid = loginInfo['uid'];
-          Navigator.pushReplacementNamed(context, 'disclaimer');
+          Navigator.pushReplacementNamed(context, 'disclaimer', arguments: loginInfo['token']);
 
         }
       }else{

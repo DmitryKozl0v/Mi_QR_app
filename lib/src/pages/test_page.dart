@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_app_cliente2/src/models/firebase_user_model.dart';
 import 'package:qr_app_cliente2/src/models/login_model.dart';
 
-import 'package:qr_app_cliente2/src/utils/utils.dart' as utils;
+// import 'package:qr_app_cliente2/src/utils/utils.dart' as utils;
 import 'package:qr_app_cliente2/src/bloc/login_bloc.dart';
 import 'package:qr_app_cliente2/src/providers/login_provider.dart';
 import 'package:qr_app_cliente2/src/shared_preferences/shared_preferences.dart';
@@ -171,23 +171,23 @@ class TestPage extends StatelessWidget {
     // loginKey.currentState.save();
     // Map info = await loginProvider.login(loginData.email, loginData.password);
     // Map info = await loginProvider.updateUserName('Nicolas', userData.idToken);
-    Map info = await loginProvider.requestUser(userData.idToken, firebaseUser);
+    // Map info = await loginProvider.requestUser(userData.idToken, firebaseUser);
     
 
-    if(info['ok']){
-      print('ok');
-      print(info['user']);
+    // if(info['ok']){
+      // print('ok');
+      // print(info['user']);
     // if(userData.hasAcceptedDisclaimer){
     //   Navigator.pushReplacementNamed(context, 'home');
     // }else{
     //   Navigator.pushReplacementNamed(context, 'disclaimer');
     // }
-    }else{
-      utils.showErrorAlert(context, info['message']);
-    }
-
-
+    // }else{
+      // utils.showErrorAlert(context, info['message']);
   }
+
+
+  
 
 
   Widget _crearFondo(BuildContext context) {

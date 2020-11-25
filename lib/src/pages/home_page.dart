@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-
+    String idToken = ModalRoute.of(context).settings.arguments;
     Permission.storage.request();
 
     return Scaffold(
@@ -36,14 +36,34 @@ class HomePage extends StatelessWidget{
           // ),
           IconButton(
             icon: Icon(Icons.info),
-            onPressed: () => Navigator.pushNamed(context, 'data')
+            onPressed: () => Navigator.pushNamed(context, 'data', arguments: idToken)
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: Text('Logout'),
+        child: Icon(Icons.logout),
         backgroundColor: Colors.deepPurple,
-        onPressed: () => Navigator.pushReplacementNamed(context, 'login')       
+        onPressed: () {
+
+          showDialog(
+            context: context,
+            builder: (context){
+              return AlertDialog(
+                content: Text('¿Está seguro que desea salir?'),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('No'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  FlatButton(
+                    child: Text('Si'),
+                    onPressed: () => Navigator.pushReplacementNamed(context, 'login'),
+                  )
+                ],
+              );
+            }
+          );
+        }
       ),
 
       body: _crearPagina(context)

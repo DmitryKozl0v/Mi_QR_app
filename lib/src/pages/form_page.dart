@@ -13,12 +13,19 @@ import 'package:qr_app_cliente2/src/providers/client_provider.dart';
 import 'package:qr_app_cliente2/src/providers/login_provider.dart';
 import 'package:qr_app_cliente2/src/shared_preferences/shared_preferences.dart';
 
-class FormPage extends StatelessWidget {
+class FormPage extends StatefulWidget {
+
+  @override
+  _FormPageState createState() => _FormPageState();
+}
+
+class _FormPageState extends State<FormPage> {
 
   final client   = new ClientModel();
   final clientProvider = new ClientProvider();
   final loginProvider = new LoginProvider();
   final formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +39,6 @@ class FormPage extends StatelessWidget {
     );
   }
 
-
   Stack _crearPagina(BuildContext context){
 
     return Stack(
@@ -40,6 +46,15 @@ class FormPage extends StatelessWidget {
       children: <Widget>[
         _crearFondo(),
         _datosForm(context),
+        _isLoading ? Stack(children: <Widget>[
+            Container(height: double.infinity,width: double.infinity, color: Colors.white24,),
+            Center(child: CircularProgressIndicator(
+              backgroundColor: Color.fromRGBO(39, 39, 39, 1.0),
+              strokeWidth: 5.0,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple[400])
+              )
+            )
+          ]) : Container(),
       ],
     );
   }
@@ -143,19 +158,32 @@ class FormPage extends StatelessWidget {
   _submit(ClientBloc clientBloc, BuildContext context, SavedUserData userData) async{
 
     formKey.currentState.save();
+    setState(() {
+      _isLoading = true;
+    });
 
-    Map <String, dynamic> createClientResp = await clientProvider.createClient(client);
+    Map <String, dynamic> user = await loginProvider.firebaseAuthGetCurrentUser();
+
+    Map <String, dynamic> createClientResp = await clientProvider.createClient(client, user['idToken']);
 
     if(createClientResp['ok']){
 
       userData.hasCreatedQR = true;
 
-      await loginProvider.updateUserName(userData.dataID, userData.idToken);
+      String refreshResult = await loginProvider.firebaseAuthRefreshSession();
+      await loginProvider.updateUserName(userData.dataID, refreshResult);
+
+      setState(() {
+      _isLoading = true;
+      });
     
       Navigator.pushReplacementNamed(context, 'home');
 
       print('ok');
     }else{
+      setState(() {
+      _isLoading = true;
+      });
       utils.showErrorAlert(context, createClientResp['message']);
     }
     

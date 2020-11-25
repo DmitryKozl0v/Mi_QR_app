@@ -7,21 +7,18 @@ class DisclaimerPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _crearPagina(context)
-    );
-  }
 
-  Stack _crearPagina(BuildContext context){
-
+    String idToken = ModalRoute.of(context).settings.arguments;
     final userData = new SavedUserData();
 
-    return Stack(
+    return Scaffold(
+      body: Stack(
 
-      children: <Widget>[
-        _crearFondo(),
-        _crearDisclaimer(context, userData),
-      ],
+        children: <Widget>[
+          _crearFondo(),
+          _crearDisclaimer(context, userData, idToken),
+        ],
+      )
     );
   }
 
@@ -35,7 +32,7 @@ class DisclaimerPage extends StatelessWidget {
     );
   }
 
-  Widget _crearDisclaimer(BuildContext context, SavedUserData userData){
+  Widget _crearDisclaimer(BuildContext context, SavedUserData userData, String idToken){
 
     final titleStyle   = TextStyle(
       fontSize: 35,
@@ -78,7 +75,7 @@ class DisclaimerPage extends StatelessWidget {
                   children: <Widget>[
                     _botonNo(size),
                     Expanded(child: Container(),),
-                    _botonSi(context, userData, size),
+                    _botonSi(context, userData, size, idToken),
                   ],
                 )
               ],
@@ -105,7 +102,7 @@ class DisclaimerPage extends StatelessWidget {
     );
   }
 
-  Widget _botonSi(BuildContext context, SavedUserData userData, Size size){
+  Widget _botonSi(BuildContext context, SavedUserData userData, Size size, String idToken){
     return RaisedButton(
       child: Container(
         height: size.height * 0.06,
@@ -120,7 +117,7 @@ class DisclaimerPage extends StatelessWidget {
       onPressed: (){
 
         userData.hasAcceptedDisclaimer = true;
-        Navigator.pushReplacementNamed(context, 'home');
+        Navigator.pushReplacementNamed(context, 'home', arguments: idToken);
 
       } 
     );
